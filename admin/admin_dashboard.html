@@ -432,7 +432,7 @@ tbody.innerHTML = '';
 try {
 const { data, error } = await sb
 .from('app_users')
-.select('id, username, name, phone, amount, realized_amount, status, approved, role')
+.select('id, username, name, phone, amount, realized_amount, realized_display_bonus, status, approved, role')
 .neq('role', 'admin')         // 관리자 계정 제외
 .order(__sortKey, { ascending: __sortAsc });
 
@@ -476,7 +476,7 @@ tr.innerHTML = `
              </div>
            </td>
 
-           <td><strong>${Number(user.realized_amount || 0).toLocaleString('ko-KR')}</strong></td>
+           <td><strong>${(Number(user.realized_amount || 0) + Number(user.realized_display_bonus || 0)).toLocaleString('ko-KR')}</strong></td>
            <td>
              <div style="display:flex; gap:6px; align-items:center;">
                <input type="number" inputmode="numeric" min="0" placeholder="예: 10000"
