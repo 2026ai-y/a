@@ -1394,9 +1394,17 @@ function renderDeltaBadge(badgeEl, delta, opts = {}) {
 
         // users 값
         const amount = Number(userRow.amount || 0);
+
+        // ✅ 실제 누적수익과 화면 표시용 보정금 분리
+        // - actualTotalProfit: 기존 로그/그래프 계산용 실제 누적수익
+        // - displayBonus: 로그와 그래프에는 나타나지 않는 화면 표시용 보정금
+        // - displayTotalProfit: 누적수익/총금액/내정보에만 표시
         const realizedTotalFromUsers = Number(userRow.realized_amount || 0);
-        const totalProfit = await fetchProfitTotal(userRow.id, realizedTotalFromUsers); // ✅ 누적수익은 users.realized_amount 기준
-        const totalAssetTotal = amount + totalProfit;
+        const actualTotalProfit = await fetchProfitTotal(userRow.id, realizedTotalFromUsers);
+        const displayBonus = Number(userRow.realized_display_bonus || 0);
+        const displayTotalProfit = actualTotalProfit + displayBonus;
+        const totalAssetTotal = amount + displayTotalProfit;
+
         const todayLogs = await fetchProfitLogsForToday(userRow.id);
         const recentLogs = await fetchProfitLogsRecent(userRow.id, 60);
 
@@ -1408,11 +1416,14 @@ function renderDeltaBadge(badgeEl, delta, opts = {}) {
         const dayChanged = !!(lastTodayKey && lastTodayKey !== todayKey);
         if (!lastTodayKey || dayChanged) localStorage.setItem(todayKeyStore, todayKey);
 
-        // ✅ 화면에 표시되는 수익(오늘/누적)
-        const realizedShown = (profitMode === 'today') ? todayProfit : totalProfit;
+        // ✅ 화면에 표시되는 수익
+        // 오늘 수익: 기존 오늘 로그만 사용 (보정금 미포함)
+        // 누적 수익: 실제 누적수익 + 화면 표시용 보정금
+        const realizedShown = (profitMode === 'today') ? todayProfit : displayTotalProfit;
 
-        // ✅ 총금액(투자중 + 실현)은 항상 누적수익(users.realized_amount) 기준
-        const totalShown = amount + totalProfit;
+        // ✅ 총금액은 표시용 누적수익 기준
+        // 보정금은 로그/그래프에는 없지만 총 자산 숫자에는 포함
+        const totalShown = amount + displayTotalProfit;
 
         // ✅ 타임라인
         renderTimeline(profitMode === 'today' ? todayLogs : recentLogs);
@@ -1531,7 +1542,8 @@ function renderDeltaBadge(badgeEl, delta, opts = {}) {
         } else {
           const deltas = recentLogs.map(r => Number(r.delta || 0));
           const sumRecent = deltas.reduce((s,v)=>s+v,0);
-          let base = totalProfit - sumRecent;
+          // ✅ 누적 그래프는 보정금을 절대 포함하지 않고 실제 누적수익만 사용
+          let base = actualTotalProfit - sumRecent;
           let c = base;
           if (deltas.length === 0) deltas.push(0, 0);
           if (deltas.length === 1) deltas.unshift(0);
@@ -1545,12 +1557,13 @@ function renderDeltaBadge(badgeEl, delta, opts = {}) {
         // ✅ 상태/단계/내정보
         renderStatus(userRow.status);
         renderSteps(userRow.status);
-        fillAccountInfo({ ...userRow, realized_amount: totalProfit });
+        // ✅ 내 정보의 누적 수익 숫자에도 표시용 보정금 포함
+        fillAccountInfo({ ...userRow, realized_amount: displayTotalProfit });
 
-        // prev 저장
+        // prev 저장 (화면 표시 기준)
         prev.amount = amount;
         prev.todayProfit = todayProfit;
-        prev.totalProfit = totalProfit;
+        prev.totalProfit = displayTotalProfit;
         prev.totalAsset = totalShown;
         prev.initialized = true;
         prev.suppressDeltaOnce = false;
