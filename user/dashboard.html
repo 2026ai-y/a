@@ -365,6 +365,16 @@
     .intro-points li { margin-bottom:6px; }
     .scenario-highlight { font-weight:900; color:#4f46e5; }
 
+    /* 진행 상태 안내: 번호와 설명을 가로 정렬 */
+    #sectionIntro .guide-steps { display:flex; flex-direction:column; }
+    #sectionIntro .gstep { display:flex; align-items:flex-start; gap:18px; padding:14px 0; border-bottom:1px solid #dce5f0; }
+    #sectionIntro .gstep:last-child { border-bottom:none; }
+    #sectionIntro .gnum { flex:0 0 34px; height:34px; display:flex; align-items:center; justify-content:center; background:#edf4ff; border:1px solid #d4e4fa; border-radius:11px; color:#15549a; font-size:12px; font-weight:700; }
+    #sectionIntro .gstep > div:last-child { flex:1; min-width:0; }
+    #sectionIntro .gstep b { display:block; color:#163a68; font-size:13px; margin-bottom:5px; }
+    #sectionIntro .gstep p { margin:0; color:#536b88; font-size:12px; line-height:1.8; }
+
+
     /* ✅ 내 정보 */
     .account-grid { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:10px; font-size:13px; }
     @media (max-width: 720px) { .account-grid { grid-template-columns: repeat(2, minmax(0,1fr)); } }
@@ -587,14 +597,18 @@
                  </p> 
              </div> 
              
-             <div class="intro-box" style="margin-top:10px;"> 진행 상태 안내<div class="intro-box-title"></div> 
+             <div class="intro-box" style="margin-top:10px;">
+               <div class="intro-box-title">진행 상태 안내</div> 
       <div class="guide-steps">
         <div class="gstep"><div class="gnum">01</div><div><b>대기중</b><p>투자금과 진행 조건이 확정되기 전 단계입니다. 투자가 확정되면 다음 단계로 이동합니다.</p></div></div>
         <div class="gstep"><div class="gnum">02</div><div><b>진행중</b><p>설정된 투자금과 진행 조건에 따라 AI 투자가 진행되는 단계입니다.</p></div></div>
         <div class="gstep"><div class="gnum">03</div><div><b>진행 완료</b><p>AI프로세스 수익금의 10% 수수료 완납 후, 수익금 전액이 자동 출금 처리됩니다.</p></div></div>
       </div>
-                
-              
+             </div>
+           </div>
+         </div>
+       </section>
+
       <!-- 내 정보 -->
       <section id="sectionAccount" class="card hidden">
         <div class="account-header-row">
